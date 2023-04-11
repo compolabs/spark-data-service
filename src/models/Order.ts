@@ -1,7 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-// TODO
-export interface ITrade {
+export interface IOrder {
   id: string;
   owner: string;
   asset0: string;
@@ -10,9 +9,9 @@ export interface ITrade {
   amount1: string;
 }
 
-export type TradeDocument = Document & ITrade;
+export type OrderDocument = Document & IOrder;
 
-const TradeSchema = new mongoose.Schema({
+const OrderSchema = new mongoose.Schema({
   id: { type: String, required: true },
   owner: { type: String, required: true },
   asset0: { type: String, required: true },
@@ -21,4 +20,4 @@ const TradeSchema = new mongoose.Schema({
   amount1: { type: String, required: true },
 });
 
-export const Trade = mongoose.model<TradeDocument>("Trade", TradeSchema);
+export const Order = mongoose.model<OrderDocument>("Order", OrderSchema);

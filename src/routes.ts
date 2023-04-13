@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as orderController from "./controllers/orderController";
+import * as tradeController from "./controllers/tradeController";
 
 const router = Router();
 
@@ -12,4 +13,7 @@ router.post("/order", orderController.createOrder);
 // router.put("/order/:id", orderController.updateOrder);
 // router.delete("/order/:id", orderController.deleteOrder);
 
+router.get("/trades", tradeController.getAllTrades);
+router.post("/trade", tradeController.createTrade);
+// router.post("/trades", tradeController.createTrades);
 export { router };

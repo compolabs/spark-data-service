@@ -1,6 +1,8 @@
 import { Router } from "express";
 import * as orderController from "./controllers/orderController";
 import * as tradeController from "./controllers/tradeController";
+import * as twController from "./controllers/twController";
+import { getSymbols } from "./controllers/twController";
 
 const router = Router();
 
@@ -16,4 +18,10 @@ router.post("/order", orderController.createOrder);
 router.get("/trades", tradeController.getAllTrades);
 router.post("/trade", tradeController.createTrade);
 // router.post("/trades", tradeController.createTrades);
+
+router.get("/config", twController.getConfig);
+router.get("/time", twController.getTime);
+router.get("/symbols", twController.getSymbols);
+router.get("/history", twController.getHistory);
+
 export { router };

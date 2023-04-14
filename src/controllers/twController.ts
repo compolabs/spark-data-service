@@ -12,7 +12,7 @@ export const getTime: RequestHandler<null> = async (req, res) => {
 };
 
 export const getSymbols: RequestHandler<null> = async (req, res) => {
-  res.send(await udf.symbol(req.query.symbol));
+  res.send(await udf.symbol(req.query.symbol as any));
 };
 
 export const getHistory: RequestHandler<null> = async (req, res) => {

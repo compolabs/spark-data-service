@@ -23,6 +23,9 @@ export default class Binance {
   klines(symbol: string, interval: string, startTime: number, endTime: number, limit: number) {
     return this.request("/api/v1/klines", { qs: { symbol, interval, startTime, endTime, limit } });
   }
+  trades(symbol: string) {
+    return this.request("/api/v3/trades", { qs: { symbol } });
+  }
 
   /**
    * Common request.

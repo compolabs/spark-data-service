@@ -159,29 +159,34 @@ export default class UDF {
 
     ////
     const binance = new Binance();
-    const trades = (await binance.trades("BTCUSDT")) as TBinanceTrade[];
+    const tradesBinance = (await binance.trades("BTCUSDT")) as TBinanceTrade[];
     return generateKlinesBinance(
-      trades.filter((t) => {
-        console.log(t.time, from, to);
-
+      tradesBinance.filter((t) => {
+        // console.log(t.time, from, to);
         return t.time >= from && t.time <= to;
       }) as any,
       resolution,
       from,
       to
     );
+
+    const asset0 = TOKENS_BY_SYMBOL[assetSymbol0];
+    const asset1 = TOKENS_BY_SYMBOL[assetSymbol1];
+    const trades = await Trade.find({ asset0: asset0.assetId, asset1: asset1.assetId });
     // const trades = await Trade.find({ timestamp: { $gt: from.toString(), $lt: to.toString() } });
-    // const asset0 = TOKENS_BY_SYMBOL[assetSymbol0];
-    // const asset1 = TOKENS_BY_SYMBOL[assetSymbol1];
-    // const trades = await Trade.find({ asset0: asset0.assetId, asset1: asset1.assetId });
     // //
-    // return generateKlines(
-    //   trades.map((t) => ({ ...(t as any)._doc, timestamp: tai64ToUnix(t.timestamp).toString() })),
-    //   // .filter((t) => +t.timestamp >= to && +t.timestamp <= from)
-    //   resolution,
-    //   asset0,
-    //   asset1
+    // console.log(
+    //   trades.map((t) => ({ ...(t as any)._doc, timestamp: tai64ToUnix(t.timestamp).toString() }))
     // );
+    return generateKlinesBackend(
+      trades.map((t) => ({ ...(t as any)._doc, timestamp: tai64ToUnix(t.timestamp).toString() })),
+      resolution,
+      from / 1000,
+      to / 1000,
+      asset0,
+      asset1
+    );
+
     // return {
     //   s: klines.length > 0 ? "ok" : "no_data",
     //   t: klines.map(({ timestamp }) => timestamp),
@@ -191,28 +196,29 @@ export default class UDF {
     //   l: klines.map(({ low }) => low),
     //   v: klines.map(({ volume }) => volume),
     // };
-    while (true) {
-      const klines: any = await this.binance.klines(symbol_str, interval, from, to, 500);
 
-      totalKlines = totalKlines.concat(klines);
-      if (klines.length == 500) {
-        from = klines[klines.length - 1][0] + 1;
-      } else {
-        if (totalKlines.length === 0) {
-          return { s: "no_data" };
-        } else {
-          return {
-            s: "ok", //status
-            t: totalKlines.map((b) => Math.floor(b[0] / 1000)), //timestamp
-            c: totalKlines.map((b) => parseFloat(b[4])), //close
-            o: totalKlines.map((b) => parseFloat(b[1])), //open
-            h: totalKlines.map((b) => parseFloat(b[2])), //high
-            l: totalKlines.map((b) => parseFloat(b[3])), //low
-            v: totalKlines.map((b) => parseFloat(b[5])), //volume
-          };
-        }
-      }
-    }
+    // while (true) {
+    //   const klines: any = await this.binance.klines(symbol_str, interval, from, to, 500);
+    //
+    //   totalKlines = totalKlines.concat(klines);
+    //   if (klines.length == 500) {
+    //     from = klines[klines.length - 1][0] + 1;
+    //   } else {
+    //     if (totalKlines.length === 0) {
+    //       return { s: "no_data" };
+    //     } else {
+    //       return {
+    //         s: "ok", //status
+    //         t: totalKlines.map((b) => Math.floor(b[0] / 1000)), //timestamp
+    //         c: totalKlines.map((b) => parseFloat(b[4])), //close
+    //         o: totalKlines.map((b) => parseFloat(b[1])), //open
+    //         h: totalKlines.map((b) => parseFloat(b[2])), //high
+    //         l: totalKlines.map((b) => parseFloat(b[3])), //low
+    //         v: totalKlines.map((b) => parseFloat(b[5])), //volume
+    //       };
+    //     }
+    //   }
+    // }
   }
 }
 
@@ -243,7 +249,7 @@ function generateKlinesBinance(trades: TBinanceTrade[], period: string, from: nu
   if (sorted.length == 0) return result;
   let start = from;
   while (true) {
-    const end = +start + getPeriodMs(period) / 1000;
+    const end = +start + getPeriodInSeconds(period);
     const batch = sorted.filter(({ time }) => +time >= start && +time < end);
     // .map((v) => (v as any)._doc);
     start = end;
@@ -262,28 +268,41 @@ function generateKlinesBinance(trades: TBinanceTrade[], period: string, from: nu
   result.t[result.t.length - 1] = to;
   return result;
 }
-function generateKlinesBackend(trades: ITrade[], period: string, asset0: IToken, asset1: IToken) {
+
+function generateKlinesBackend(
+  trades: ITrade[],
+  period: string,
+  from: number,
+  to: number,
+  asset0: IToken,
+  asset1: IToken
+) {
   const sorted = trades.slice().sort((a, b) => (+a.timestamp < +b.timestamp ? -1 : 1));
-  // const grouped = [];
   const result: TKlines = { s: "no_data", t: [], c: [], o: [], h: [], l: [], v: [] };
-  let start = +sorted[0].timestamp;
+  let start = new BN(from);
   while (true) {
-    const end = +start + getPeriodMs(period) / 1000;
-    const batch = sorted.filter(({ timestamp }) => +timestamp >= start && +timestamp < end);
-    // .map((v) => (v as any)._doc);
-    start = end;
+    const end = start.plus(getPeriodInSeconds(period));
+    const batch = sorted.filter(
+      ({ timestamp }) => new BN(timestamp).gte(start) && new BN(timestamp).lte(end)
+    );
     if (batch.length > 0) {
       if (result.s === "no_data") result.s = "ok";
       const prices = batch.map((t) => getTradePrice(t, asset0, asset1));
-      result.t.push(+batch[0].timestamp);
+      const sum = batch.reduce(
+        (amount, { amount0 }) => amount.plus(BN.formatUnits(amount0, asset0.decimals)),
+        BN.ZERO
+      );
+      result.t.push(start.toNumber());
       result.o.push(prices[0]);
       result.c.push(prices[prices.length - 1]);
       result.h.push(Math.max(...prices));
       result.l.push(Math.min(...prices));
-      result.v.push(0);
+      result.v.push(sum.toNumber());
     }
-    if (start > +sorted[sorted.length - 1].timestamp) break;
+    start = end;
+    if (start.gte(to)) break;
   }
+  // console.log("result", result.t);
   return result;
   // console.log(grouped);
   // const klines = [];
@@ -351,26 +370,26 @@ function tai64ToUnix(timestamp: number | string) {
   return dayjs(Number(time) * 1000).unix();
 }
 
-function getPeriodMs(period: string): number {
+function getPeriodInSeconds(period: string): number {
   const map: Record<string, number> = {
-    "1": 60 * 1000,
-    "3": 3 * 60 * 1000,
-    "5": 5 * 60 * 1000,
-    "15": 15 * 60 * 1000,
-    "30": 30 * 60 * 1000,
-    "60": 60 * 60 * 1000,
-    "120": 2 * 60 * 60 * 1000,
-    "240": 4 * 60 * 60 * 1000,
-    "360": 6 * 60 * 60 * 1000,
-    "480": 8 * 60 * 60 * 1000,
-    "720": 12 * 60 * 60 * 1000,
-    D: 24 * 60 * 60 * 1000,
-    "1D": 24 * 60 * 60 * 1000,
-    "3D": 3 * 24 * 60 * 60 * 1000,
-    W: 7 * 24 * 60 * 60 * 1000,
-    "1W": 7 * 24 * 60 * 60 * 1000,
-    M: 30 * 24 * 60 * 60 * 1000,
-    "1M": 30 * 24 * 60 * 60 * 1000,
+    "1": 60,
+    "3": 3 * 60,
+    "5": 5 * 60,
+    "15": 15 * 60,
+    "30": 30 * 60,
+    "60": 60 * 60,
+    "120": 2 * 60 * 60,
+    "240": 4 * 60 * 60,
+    "360": 6 * 60 * 60,
+    "480": 8 * 60 * 60,
+    "720": 12 * 60 * 60,
+    D: 24 * 60 * 60,
+    "1D": 24 * 60 * 60,
+    "3D": 3 * 24 * 60 * 60,
+    W: 7 * 24 * 60 * 60,
+    "1W": 7 * 24 * 60 * 60,
+    M: 30 * 24 * 60 * 60,
+    "1M": 30 * 24 * 60 * 60,
   };
   if (map[period] != null) {
     return map[period];

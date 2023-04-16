@@ -1,9 +1,7 @@
 import Binance from "./binance";
 import { ITrade, Trade } from "../models/Trade";
-import dayjs from "dayjs";
-import { IToken, TOKENS_BY_SYMBOL } from "../constants";
+import { TOKENS_BY_SYMBOL } from "../constants";
 import BN from "../utils/BN";
-import request from "request";
 
 class UDFError extends Error {}
 
@@ -122,7 +120,6 @@ export default class UDF {
    * @param {string} resolution
    */
   async history(symbol_str: string, from: number, to: number, resolution: string) {
-    // console.log({ from, to });
     const symbol = symbols.find((s) => s.symbol === symbol_str);
     if (symbol == null) throw new SymbolNotFound();
     const assetSymbol0 = symbol.symbol.replace(symbol.currency_code, "");
@@ -152,73 +149,43 @@ export default class UDF {
     const interval = RESOLUTIONS_INTERVALS_MAP[resolution];
     if (!interval) throw new InvalidResolution();
 
-    let totalKlines: any[] = [];
+    // let totalKlines: any[] = [];
 
     from *= 1000;
     to *= 1000;
 
-    ////
-    const binance = new Binance();
-    const tradesBinance = (await binance.trades("BTCUSDT")) as TBinanceTrade[];
-    return generateKlinesBinance(
-      tradesBinance.filter((t) => {
-        // console.log(t.time, from, to);
-        return t.time >= from && t.time <= to;
-      }) as any,
+    // const binance = new Binance();
+    // const tradesBinance = (await binance.trades("BTCUSDT")) as TBinanceTrade[];
+    // const tradesBinance = binanceData as TBinanceTrade[];
+    // return generateKlinesBinance(
+    //   tradesBinance.filter((t) => {
+    //     return t.time >= from && t.time <= to;
+    //   }) as any,
+    //   resolution,
+    //   from,
+    //   to
+    // );
+    ////////-------------------------change type
+
+    const asset0 = TOKENS_BY_SYMBOL[assetSymbol0];
+    const asset1 = TOKENS_BY_SYMBOL[assetSymbol1];
+    const trades = await Trade.find(
+      {
+        asset0: asset0.assetId,
+        asset1: asset1.assetId,
+      }
+      // { timestamp: { $gt: from.toString(), $lt: to.toString() } }
+    );
+    return generateKlinesBackend(
+      trades
+        .map((t) => ({ ...(t as any)._doc }))
+        .filter((t) => {
+          return t.timestamp >= from && t.timestamp <= to;
+        }) as any,
       resolution,
       from,
       to
     );
-
-    const asset0 = TOKENS_BY_SYMBOL[assetSymbol0];
-    const asset1 = TOKENS_BY_SYMBOL[assetSymbol1];
-    const trades = await Trade.find({ asset0: asset0.assetId, asset1: asset1.assetId });
-    // const trades = await Trade.find({ timestamp: { $gt: from.toString(), $lt: to.toString() } });
-    // //
-    // console.log(
-    //   trades.map((t) => ({ ...(t as any)._doc, timestamp: tai64ToUnix(t.timestamp).toString() }))
-    // );
-    return generateKlinesBackend(
-      trades.map((t) => ({ ...(t as any)._doc, timestamp: tai64ToUnix(t.timestamp).toString() })),
-      resolution,
-      from / 1000,
-      to / 1000,
-      asset0,
-      asset1
-    );
-
-    // return {
-    //   s: klines.length > 0 ? "ok" : "no_data",
-    //   t: klines.map(({ timestamp }) => timestamp),
-    //   c: klines.map(({ close }) => close),
-    //   o: klines.map(({ open }) => open),
-    //   h: klines.map(({ high }) => high),
-    //   l: klines.map(({ low }) => low),
-    //   v: klines.map(({ volume }) => volume),
-    // };
-
-    // while (true) {
-    //   const klines: any = await this.binance.klines(symbol_str, interval, from, to, 500);
-    //
-    //   totalKlines = totalKlines.concat(klines);
-    //   if (klines.length == 500) {
-    //     from = klines[klines.length - 1][0] + 1;
-    //   } else {
-    //     if (totalKlines.length === 0) {
-    //       return { s: "no_data" };
-    //     } else {
-    //       return {
-    //         s: "ok", //status
-    //         t: totalKlines.map((b) => Math.floor(b[0] / 1000)), //timestamp
-    //         c: totalKlines.map((b) => parseFloat(b[4])), //close
-    //         o: totalKlines.map((b) => parseFloat(b[1])), //open
-    //         h: totalKlines.map((b) => parseFloat(b[2])), //high
-    //         l: totalKlines.map((b) => parseFloat(b[3])), //low
-    //         v: totalKlines.map((b) => parseFloat(b[5])), //volume
-    //       };
-    //     }
-    //   }
-    // }
   }
 }
 
@@ -231,12 +198,13 @@ type TKlines = {
   v: Array<number>;
   t: Array<number>;
 };
-
-const getTradePrice = (trade: ITrade, asset0: IToken, asset1: IToken): number => {
-  const amount0 = BN.formatUnits(trade.amount0, asset0.decimals);
-  const amount1 = BN.formatUnits(trade.amount1, asset1.decimals);
-  return amount0.div(amount1).toNumber();
-};
+// const getTradePrice = (trade: ITrade, asset0: IToken, asset1: IToken): number => {
+//   // const amount0 = BN.formatUnits(trade.amount0, asset0.decimals);
+//   const amount0 = BN.formatUnits(trade.amount0);
+//   // const amount1 = BN.formatUnits(trade.amount1, asset1.decimals);
+//   const amount1 = BN.formatUnits(trade.amount1);
+//   return amount1.div(amount0).toNumber();
+// };
 
 type TBinanceTrade = {
   time: number;
@@ -251,7 +219,6 @@ function generateKlinesBinance(trades: TBinanceTrade[], period: string, from: nu
   while (true) {
     const end = +start + getPeriodInSeconds(period);
     const batch = sorted.filter(({ time }) => +time >= start && +time < end);
-    // .map((v) => (v as any)._doc);
     start = end;
     if (batch.length > 0) {
       if (result.s === "no_data") result.s = "ok";
@@ -269,30 +236,19 @@ function generateKlinesBinance(trades: TBinanceTrade[], period: string, from: nu
   return result;
 }
 
-function generateKlinesBackend(
-  trades: ITrade[],
-  period: string,
-  from: number,
-  to: number,
-  asset0: IToken,
-  asset1: IToken
-) {
+function generateKlinesBackend(trades: ITrade[], period: string, from: number, to: number) {
   const sorted = trades.slice().sort((a, b) => (+a.timestamp < +b.timestamp ? -1 : 1));
   const result: TKlines = { s: "no_data", t: [], c: [], o: [], h: [], l: [], v: [] };
-  let start = new BN(from);
+  if (sorted.length == 0) return result;
+  let start = from;
   while (true) {
-    const end = start.plus(getPeriodInSeconds(period));
-    const batch = sorted.filter(
-      ({ timestamp }) => new BN(timestamp).gte(start) && new BN(timestamp).lte(end)
-    );
+    const end = +start + getPeriodInSeconds(period);
+    const batch = sorted.filter(({ timestamp }) => +timestamp >= start && +timestamp <= end);
     if (batch.length > 0) {
       if (result.s === "no_data") result.s = "ok";
-      const prices = batch.map((t) => getTradePrice(t, asset0, asset1));
-      const sum = batch.reduce(
-        (amount, { amount0 }) => amount.plus(BN.formatUnits(amount0, asset0.decimals)),
-        BN.ZERO
-      );
-      result.t.push(start.toNumber());
+      const prices = batch.map((t) => +t.price);
+      const sum = batch.reduce((amount, { amount0 }) => amount.plus(amount0), BN.ZERO);
+      result.t.push(+batch[0].timestamp);
       result.o.push(prices[0]);
       result.c.push(prices[prices.length - 1]);
       result.h.push(Math.max(...prices));
@@ -300,75 +256,16 @@ function generateKlinesBackend(
       result.v.push(sum.toNumber());
     }
     start = end;
-    if (start.gte(to)) break;
+    if (start > +sorted[sorted.length - 1].timestamp) break;
   }
-  // console.log("result", result.t);
+  result.t[result.t.length - 1] = to;
   return result;
-  // console.log(grouped);
-  // const klines = [];
-  // const periodMs = getPeriodMs(period);
-  //
-  // let startTime = tai64ToUnix(trades[0].timestamp);
-  // let endTime = new Date(startTime).getTime() + periodMs;
-  // let open = new BN(trades[0].amount1).div(trades[0].amount0);
-  // let high = open;
-  // let low = open;
-  // let close = open;
-  // let volume = new BN(trades[0].amount1);
-  //
-  // for (let i = 1; i < trades.length; i++) {
-  //   const trade = trades[i];
-  //   const tradeTime = new Date(tai64ToUnix(trade.timestamp)).getTime();
-  //
-  //   if (tradeTime >= endTime) {
-  //     klines.push({
-  //       open: open.toNumber(),
-  //       high: high.toNumber(),
-  //       low: low.toNumber(),
-  //       close: close.toNumber(),
-  //       volume: volume.toNumber(),
-  //       timestamp: startTime,
-  //     });
-  //
-  //     startTime = tai64ToUnix(trade.timestamp);
-  //     endTime = tradeTime + periodMs;
-  //     open = new BN(trade.amount1).div(trade.amount0);
-  //     high = open;
-  //     low = open;
-  //     close = open;
-  //     volume = new BN(trade.amount1);
-  //   } else {
-  //     const price = new BN(trade.amount1).div(trade.amount0);
-  //
-  //     if (price > high) {
-  //       high = price;
-  //     }
-  //
-  //     if (price < low) {
-  //       low = price;
-  //     }
-  //
-  //     close = price;
-  //     volume = volume.plus(trade.amount1);
-  //   }
-  // }
-  //
-  // klines.push({
-  //   open: open.toNumber(),
-  //   high: high.toNumber(),
-  //   low: low.toNumber(),
-  //   close: close.toNumber(),
-  //   volume: volume.toNumber(),
-  //   timestamp: startTime,
-  // });
-  //
-  // return klines;
 }
 
-function tai64ToUnix(timestamp: number | string) {
-  const time = BigInt(timestamp) - BigInt(Math.pow(2, 62)) - BigInt(10);
-  return dayjs(Number(time) * 1000).unix();
-}
+// function tai64ToUnix(timestamp: number | string) {
+//   const time = BigInt(timestamp) - BigInt(Math.pow(2, 62)) - BigInt(10);
+//   return dayjs(Number(time) * 1000).unix();
+// }
 
 function getPeriodInSeconds(period: string): number {
   const map: Record<string, number> = {

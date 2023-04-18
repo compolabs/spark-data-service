@@ -5,8 +5,7 @@ export interface ITrade {
   amount0: string;
   asset1: string;
   amount1: string;
-  price: string;
-  timestamp: string;
+  timestamp: number;
 }
 
 export type TradeDocument = Document & ITrade;
@@ -16,8 +15,7 @@ const TradeSchema = new mongoose.Schema({
   amount0: { type: String, required: true },
   asset1: { type: String, required: true },
   amount1: { type: String, required: true },
-  price: { type: String, required: true },
-  timestamp: { type: String, required: true },
+  timestamp: { type: Number, required: true },
 });
 
 export const Trade = mongoose.model<TradeDocument>("Trade", TradeSchema);

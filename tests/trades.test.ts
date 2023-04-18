@@ -24,4 +24,7 @@ describe("items", () => {
   it("clean db", async () => {
     await Trade.deleteMany();
   }, 500000);
+  it("print db", async () => {
+    console.log(await Trade.find({}));
+  }, 500000);
 });

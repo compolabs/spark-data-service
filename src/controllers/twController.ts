@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import UDF from "../services/udf";
+import UDF, { symbols } from "../services/udf";
 const udf = new UDF();
 
 export const getConfig: RequestHandler<null> = async (req, res, next) => {
@@ -13,6 +13,10 @@ export const getTime: RequestHandler<null> = async (req, res) => {
 
 export const getSymbols: RequestHandler<null> = async (req, res) => {
   res.send(await udf.symbol(req.query.symbol as any));
+};
+
+export const getAllSymbols: RequestHandler<null> = async (req, res) => {
+  res.send(symbols.map(({ symbol }) => symbol));
 };
 
 export const getHistory: RequestHandler<null> = async (req, res) => {

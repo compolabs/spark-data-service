@@ -10,7 +10,7 @@ router.get("/", (req, res) => res.send("Server is alive 👌"));
 
 // Order routes
 router.get("/orders", orderController.getAllOrders);
-router.post("/order", orderController.createOrder);
+// router.post("/order", orderController.createOrder);
 // router.get("/order/:id", orderController.getOrderById);
 // router.put("/order/:id", orderController.updateOrder);
 // router.delete("/order/:id", orderController.deleteOrder);
@@ -21,6 +21,7 @@ router.post("/trade", tradeController.createTrade);
 
 router.get("/config", twController.getConfig);
 router.get("/time", twController.getTime);
+router.get("/allSymbols", twController.getAllSymbols);
 router.get("/symbols", twController.getSymbols);
 router.get("/history", twController.getHistory);
 

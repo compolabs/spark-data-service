@@ -36,32 +36,37 @@ const supportedResolutions = [
   "1M",
 ];
 
-const symbols = ["ETH", "BTC", "USDC", "UNI", "LINK", "COMP"].reduce((acc, symbol0, _, arr) => {
-  const batch = arr.map((symbol1) => ({
-    symbol: `${symbol0}${symbol1}`,
-    ticker: `${symbol0}${symbol1}`,
-    name: `${symbol0}${symbol1}`,
-    full_name: `${symbol0}${symbol1}`,
-    description: `${symbol0} / ${symbol1}`,
-    currency_code: symbol1,
-    exchange: "SPARK",
-    listed_exchange: "SPARK",
-    type: "crypto",
-    session: "24x7",
-    timezone: "UTC",
-    minmovement: 1,
-    minmov: 1,
-    minmovement2: 0,
-    minmov2: 0,
-    // pricescale: pricescale(symbol),
-    supported_resolutions: supportedResolutions,
-    has_intraday: true,
-    has_daily: true,
-    has_weekly_and_monthly: true,
-    data_status: "streaming",
-  }));
-  return [...acc, ...batch];
-}, [] as Array<TSymbol>);
+export const symbols = ["ETH", "BTC", "USDC", "UNI", "LINK", "COMP"].reduce(
+  (acc, symbol0, _, arr) => {
+    const batch = arr
+      .filter((symbol1) => symbol1 !== symbol0)
+      .map((symbol1) => ({
+        symbol: `${symbol0}/${symbol1}`,
+        ticker: `${symbol0}/${symbol1}`,
+        name: `${symbol0}/${symbol1}`,
+        full_name: `${symbol0}/${symbol1}`,
+        description: `${symbol0} / ${symbol1}`,
+        currency_code: symbol1,
+        exchange: "SPARK",
+        listed_exchange: "SPARK",
+        type: "crypto",
+        session: "24x7",
+        timezone: "UTC",
+        minmovement: 1,
+        minmov: 1,
+        minmovement2: 0,
+        minmov2: 0,
+        // pricescale: pricescale(symbol),
+        supported_resolutions: supportedResolutions,
+        has_intraday: true,
+        has_daily: true,
+        has_weekly_and_monthly: true,
+        data_status: "streaming",
+      }));
+    return [...acc, ...batch];
+  },
+  [] as Array<TSymbol>
+);
 
 export default class UDF {
   binance: Binance;
@@ -96,18 +101,14 @@ export default class UDF {
 
   /**
    * Symbol resolve.
-   * @param {string} symbol Symbol name or ticker.
+   * @param {string} input Symbol name or ticker.
    * @returns {object} Symbol.
    */
-  symbol(symbol: string) {
-    const comps = symbol.split(":");
-    const s = (comps.length > 1 ? comps[1] : symbol).toUpperCase();
-
-    for (const symbol of symbols) {
-      if (symbol.symbol === s) {
-        return symbol;
-      }
-    }
+  symbol(input: string) {
+    const comps = input.split(":");
+    const s = (comps.length > 1 ? comps[1] : input).toUpperCase();
+    const symbol = symbols.find(({ symbol }) => symbol === s);
+    if (symbol != null) return symbol;
 
     throw new SymbolNotFound();
   }
@@ -122,8 +123,7 @@ export default class UDF {
   async history(symbol_str: string, from: number, to: number, resolution: string) {
     const symbol = symbols.find((s) => s.symbol === symbol_str);
     if (symbol == null) throw new SymbolNotFound();
-    const assetSymbol0 = symbol.symbol.replace(symbol.currency_code, "");
-    const assetSymbol1 = symbol.currency_code;
+    const [assetSymbol0, assetSymbol1] = symbol.symbol.split("/");
 
     const RESOLUTIONS_INTERVALS_MAP: Record<string, string> = {
       "1": "1m",

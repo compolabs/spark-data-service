@@ -1,5 +1,5 @@
 import { schedule } from "node-cron";
-import OrdersFetcher from "../../services/ordersFetcher";
+import OrdersFetcher from "../services/ordersFetcher";
 
 export const initOrderFetcherCrone = async () => {
   const fetcher = new OrdersFetcher();

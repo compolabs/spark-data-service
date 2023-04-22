@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { app } from "./app";
 import { mongoUrl, port } from "./config";
-import { initOrderFetcherCrone } from "./constants/crones/orderFetcherCrone";
+import { initOrderFetcherCrone } from "./crones/orderFetcherCrone";
 
 // Connect to MongoDB
 // mongoose.Promise = bluebird;

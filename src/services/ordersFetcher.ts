@@ -22,7 +22,7 @@ class OrdersFetcher {
     if (this.initialized) throw new Error("Already initialized");
     await this.fetchAllOrders().then(() => this.setInitialized(true));
   };
-
+  //TODO
   public fetchNewOrders = async () => {
     // const ordersAmount = await this.getOrdersAmount();
     // const functions = this.limitOrdersContract.functions;
@@ -45,7 +45,7 @@ class OrdersFetcher {
     // );
     // this.orders = [...chunks.flat(), ...this.orders];
   };
-
+  //TODO
   public updateActiveOrders = async () => {
     // const functions = this.limitOrdersContract?.functions;
     // if (functions == null) return;

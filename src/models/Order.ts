@@ -6,14 +6,14 @@ export interface IOrder {
   id: number;
   owner: string;
   asset0: string;
-  amount0: number;
+  amount0: string;
   asset1: string;
-  amount1: number;
-  fulfilled0: number;
-  fulfilled1: number;
+  amount1: string;
+  fulfilled0: string;
+  fulfilled1: string;
   timestamp: number;
-  matcher_fee: number;
-  matcher_fee_used: number;
+  matcher_fee: string;
+  matcher_fee_used: string;
 }
 
 export const orderOutputToIOrder = (order: OrderOutput) => ({

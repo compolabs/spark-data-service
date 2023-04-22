@@ -2,8 +2,11 @@ import { RequestHandler } from "express";
 import { Order } from "../models/Order";
 import BN from "../utils/BN";
 import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
-
-export const getAllOrders: RequestHandler<null> = async (req, res, next) => {
+// status: Active | Canceled | Completed
+// symbol: string, example: BTC/USDC
+// maxPrice: number
+// priceDecimal: number
+export const getOrders: RequestHandler<null> = async (req, res, next) => {
   const filter: Record<string, string> = {};
   if (typeof req.query.status === "string") filter["status"] = req.query.status;
   if (typeof req.query.symbol === "string") {

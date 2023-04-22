@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { app } from "./app";
-import { port } from "./config";
+import { mongoUrl, port } from "./config";
+import { initOrderFetcherCrone } from "./constants/crones/orderFetcherCrone";
 
 // Connect to MongoDB
 // mongoose.Promise = bluebird;
-const mongoUrl = "mongodb://superadmin:1488mongo228@localhost:27017/?authSource=admin";
 mongoose
   .connect(mongoUrl, {
     useNewUrlParser: true,
@@ -12,7 +12,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("✅  Connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
     /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
   })
   .catch((err) => {
@@ -20,6 +20,8 @@ mongoose
     // process.exit();
   });
 
-app.listen(port ?? 5000, () => {
-  console.log("🚀 Server ready at: http://localhost:" + port);
+initOrderFetcherCrone().then(() => {
+  app.listen(port ?? 5000, () => {
+    console.log("🚀 Server ready at: http://localhost:" + port);
+  });
 });

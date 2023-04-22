@@ -9,7 +9,7 @@ const router = Router();
 router.get("/", (req, res) => res.send("Server is alive 👌"));
 
 // Order routes
-router.get("/orders", orderController.getAllOrders);
+router.get("/orders", orderController.getOrders);
 // router.post("/order", orderController.createOrder);
 // router.get("/order/:id", orderController.getOrderById);
 // router.put("/order/:id", orderController.updateOrder);

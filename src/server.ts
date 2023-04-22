@@ -20,8 +20,8 @@ mongoose
     // process.exit();
   });
 
-initOrderFetcherCrone();
-
-app.listen(port ?? 5000, () => {
-  console.log("🚀 Server ready at: http://localhost:" + port);
+initOrderFetcherCrone().then(() => {
+  app.listen(port ?? 5000, () => {
+    console.log("🚀 Server ready at: http://localhost:" + port);
+  });
 });

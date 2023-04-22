@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
+  "engines": {
+    "node": "18.14.0"
+  },
   "scripts": {
     "test": "jest",
     "start": "nodemon",

@@ -4,7 +4,7 @@ import OrdersFetcher from "../services/ordersFetcher";
 export const initOrderFetcherCrone = async () => {
   const fetcher = new OrdersFetcher();
   await fetcher.init().then(() => console.log("✅ Order Fetcher initialized"));
-  const scheduledJobFunction = schedule("*/10 * * * * *", () =>
+  const scheduledJobFunction = schedule("*/5 * * * * *", () =>
     Promise.all([fetcher.updateActiveOrders(), fetcher.fetchNewOrders()])
   );
 

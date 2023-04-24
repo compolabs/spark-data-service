@@ -9,6 +9,7 @@ import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
 export const getOrders: RequestHandler<null> = async (req, res, next) => {
   const filter: Record<string, string> = {};
   if (typeof req.query.id === "string") filter["id"] = req.query.id;
+  if (typeof req.query.owner === "string") filter["owner"] = req.query.owner;
   if (typeof req.query.status === "string") filter["status"] = req.query.status;
   if (typeof req.query.symbol === "string") {
     const [symbol0, symbol1] = req.query.symbol.split("/");

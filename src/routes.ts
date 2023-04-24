@@ -2,7 +2,6 @@ import { Router } from "express";
 import * as orderController from "./controllers/orderController";
 import * as tradeController from "./controllers/tradeController";
 import * as twController from "./controllers/twController";
-import { getSymbols } from "./controllers/twController";
 
 const router = Router();
 
@@ -16,6 +15,7 @@ router.get("/orders", orderController.getOrders);
 // router.delete("/order/:id", orderController.deleteOrder);
 
 router.get("/trades", tradeController.getAllTrades);
+router.get("/trades/pair/:symbol0/:symbol1", tradeController.getLatestTradesForPair);
 router.post("/trade", tradeController.createTrade);
 // router.post("/trades", tradeController.createTrades);
 

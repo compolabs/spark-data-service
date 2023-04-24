@@ -18,21 +18,61 @@ import type {
   FunctionFragment,
   Interface,
   InvokeFunction,
-} from 'fuels';
+} from "fuels";
 
 import type { Option, Enum } from "./common";
 
-export type StatusInput = Enum<{ Active: [], Canceled: [], Completed: [] }>;
+export type StatusInput = Enum<{ Active: []; Canceled: []; Completed: [] }>;
 export type StatusOutput = StatusInput;
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
-export type OrderInput = { asset0: ContractIdInput, amount0: BigNumberish, asset1: ContractIdInput, amount1: BigNumberish, status: StatusInput, fulfilled0: BigNumberish, fulfilled1: BigNumberish, owner: AddressInput, id: BigNumberish, timestamp: BigNumberish, matcher_fee: BigNumberish, matcher_fee_used: BigNumberish };
-export type OrderOutput = { asset0: ContractIdOutput, amount0: BN, asset1: ContractIdOutput, amount1: BN, status: StatusOutput, fulfilled0: BN, fulfilled1: BN, owner: AddressOutput, id: BN, timestamp: BN, matcher_fee: BN, matcher_fee_used: BN };
-export type TradeInput = { order_id: BigNumberish, asset0: ContractIdInput, amount0: BigNumberish, asset1: ContractIdInput, amount1: BigNumberish, timestamp: BigNumberish };
-export type TradeOutput = { order_id: BN, asset0: ContractIdOutput, amount0: BN, asset1: ContractIdOutput, amount1: BN, timestamp: BN };
+export type OrderInput = {
+  asset0: ContractIdInput;
+  amount0: BigNumberish;
+  asset1: ContractIdInput;
+  amount1: BigNumberish;
+  status: StatusInput;
+  fulfilled0: BigNumberish;
+  fulfilled1: BigNumberish;
+  owner: AddressInput;
+  id: BigNumberish;
+  timestamp: BigNumberish;
+  matcher_fee: BigNumberish;
+  matcher_fee_used: BigNumberish;
+};
+export type OrderOutput = {
+  asset0: ContractIdOutput;
+  amount0: BN;
+  asset1: ContractIdOutput;
+  amount1: BN;
+  status: StatusOutput;
+  fulfilled0: BN;
+  fulfilled1: BN;
+  owner: AddressOutput;
+  id: BN;
+  timestamp: BN;
+  matcher_fee: BN;
+  matcher_fee_used: BN;
+};
+export type TradeInput = {
+  order_id: BigNumberish;
+  asset0: ContractIdInput;
+  amount0: BigNumberish;
+  asset1: ContractIdInput;
+  amount1: BigNumberish;
+  timestamp: BigNumberish;
+};
+export type TradeOutput = {
+  order_id: BN;
+  asset0: ContractIdOutput;
+  amount0: BN;
+  asset1: ContractIdOutput;
+  amount1: BN;
+  timestamp: BN;
+};
 
 interface LimitOrdersAbiInterface extends Interface {
   functions: {
@@ -47,50 +87,140 @@ interface LimitOrdersAbiInterface extends Interface {
     orders_amount: FunctionFragment;
     orders_by_id: FunctionFragment;
     trades: FunctionFragment;
+    trades_amount: FunctionFragment;
     withdraw: FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'cancel_order', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'create_order', values: [ContractIdInput, BigNumberish, BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'deposit', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'fulfill_order', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_deposit_by_address', values: [AddressInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'match_orders', values: [BigNumberish, BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'order_by_id', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'orders', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'orders_amount', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'orders_by_id', values: [[BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish]]): Uint8Array;
-  encodeFunctionData(functionFragment: 'trades', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'withdraw', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: "cancel_order", values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "create_order",
+    values: [ContractIdInput, BigNumberish, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(functionFragment: "deposit", values: []): Uint8Array;
+  encodeFunctionData(functionFragment: "fulfill_order", values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_deposit_by_address",
+    values: [AddressInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "match_orders",
+    values: [BigNumberish, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(functionFragment: "order_by_id", values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: "orders", values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: "orders_amount", values: []): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "orders_by_id",
+    values: [
+      [
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ]
+    ]
+  ): Uint8Array;
+  encodeFunctionData(functionFragment: "trades", values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: "trades_amount", values: []): Uint8Array;
+  encodeFunctionData(functionFragment: "withdraw", values: [BigNumberish]): Uint8Array;
 
-  decodeFunctionData(functionFragment: 'cancel_order', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'create_order', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'deposit', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'fulfill_order', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'get_deposit_by_address', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'match_orders', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'order_by_id', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'orders', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'orders_amount', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'orders_by_id', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'trades', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'withdraw', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "cancel_order", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "create_order", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "deposit", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "fulfill_order", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "get_deposit_by_address", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "match_orders", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "order_by_id", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "orders", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "orders_amount", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "orders_by_id", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "trades", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "trades_amount", data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: "withdraw", data: BytesLike): DecodedValue;
 }
 
 export class LimitOrdersAbi extends Contract {
   interface: LimitOrdersAbiInterface;
   functions: {
     cancel_order: InvokeFunction<[id: BigNumberish], void>;
-    create_order: InvokeFunction<[asset1: ContractIdInput, amount1: BigNumberish, matcher_fee: BigNumberish], BN>;
+    create_order: InvokeFunction<
+      [asset1: ContractIdInput, amount1: BigNumberish, matcher_fee: BigNumberish],
+      BN
+    >;
     deposit: InvokeFunction<[], void>;
     fulfill_order: InvokeFunction<[id: BigNumberish], void>;
     get_deposit_by_address: InvokeFunction<[address: AddressInput], BN>;
-    match_orders: InvokeFunction<[order0_id: BigNumberish, order1_id: BigNumberish], void>;
+    match_orders: InvokeFunction<
+      [order0_id: BigNumberish, order1_id: BigNumberish],
+      [TradeOutput, TradeOutput]
+    >;
     order_by_id: InvokeFunction<[id: BigNumberish], OrderOutput>;
-    orders: InvokeFunction<[offset: BigNumberish], [Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>]>;
+    orders: InvokeFunction<
+      [offset: BigNumberish],
+      [
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>
+      ]
+    >;
     orders_amount: InvokeFunction<[], BN>;
-    orders_by_id: InvokeFunction<[ids: [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish]], [Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>, Option<OrderOutput>]>;
-    trades: InvokeFunction<[offset: BigNumberish], [Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>, Option<TradeOutput>]>;
+    orders_by_id: InvokeFunction<
+      [
+        ids: [
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish,
+          BigNumberish
+        ]
+      ],
+      [
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>,
+        Option<OrderOutput>
+      ]
+    >;
+    trades: InvokeFunction<
+      [offset: BigNumberish],
+      [
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>,
+        Option<TradeOutput>
+      ]
+    >;
+    trades_amount: InvokeFunction<[], BN>;
     withdraw: InvokeFunction<[amount: BigNumberish], void>;
   };
 }

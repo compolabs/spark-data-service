@@ -1,4 +1,6 @@
 import mongoose, { Document } from "mongoose";
+import { TradeOutput } from "../constants/limitOrdersConstants/LimitOrdersAbi";
+import { tai64toUnix } from "../utils/tai64toUnix";
 
 export interface ITrade {
   asset0: string;
@@ -7,6 +9,14 @@ export interface ITrade {
   amount1: string;
   timestamp: number;
 }
+
+export const tradeOutputToITrade = (trade: TradeOutput): ITrade => ({
+  asset0: trade.asset0.value,
+  amount0: trade.amount0.toString(),
+  asset1: trade.asset1.value,
+  amount1: trade.amount1.toString(),
+  timestamp: tai64toUnix(trade.timestamp.toString()),
+});
 
 export type TradeDocument = Document & ITrade;
 

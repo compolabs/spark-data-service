@@ -1,5 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import { OrderOutput } from "../constants/limitOrdersConstants/LimitOrdersAbi";
+import { tai64toUnix } from "../utils/tai64toUnix";
 
 export interface IOrder {
   id: number;
@@ -16,9 +17,6 @@ export interface IOrder {
   matcher_fee_used: string;
 }
 
-const convertTime = (tai64: string): number =>
-  +(BigInt(tai64) - BigInt(Math.pow(2, 62)) - BigInt(10)).toString();
-
 export const orderOutputToIOrder = (order: OrderOutput): IOrder => ({
   id: order.id.toNumber(),
   owner: order.owner.value,
@@ -29,7 +27,7 @@ export const orderOutputToIOrder = (order: OrderOutput): IOrder => ({
   status: Object.keys(order.status)[0],
   fulfilled0: order.fulfilled0.toString(),
   fulfilled1: order.fulfilled1.toString(),
-  timestamp: convertTime(order.timestamp.toString()),
+  timestamp: tai64toUnix(order.timestamp.toString()),
   matcher_fee: order.matcher_fee.toString(),
   matcher_fee_used: order.matcher_fee_used.toString(),
 });

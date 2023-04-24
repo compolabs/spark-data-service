@@ -6,11 +6,18 @@ import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
 // symbol: string, example: BTC/USDC
 // maxPrice: number
 // priceDecimal: number
+
 export const getOrders: RequestHandler<null> = async (req, res, next) => {
-  const filter: Record<string, string> = {};
+  const filter: Record<string, string | string[]> = {};
+
   if (typeof req.query.id === "string") filter["id"] = req.query.id;
+  if (typeof req.query.id === "object") filter["id"] = Object.values(req.query.id) as string[];
+
   if (typeof req.query.owner === "string") filter["owner"] = req.query.owner;
-  if (typeof req.query.status === "string") filter["status"] = req.query.status;
+  if (typeof req.query.status === "string") {
+    filter["status"] = capitalize(req.query.status.toLowerCase());
+  }
+
   if (typeof req.query.symbol === "string") {
     const [symbol0, symbol1] = req.query.symbol.split("/");
     TOKENS_BY_SYMBOL[symbol0] != null && (filter["asset0"] = TOKENS_BY_SYMBOL[symbol0].assetId);
@@ -31,6 +38,7 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
       : orders
   );
 };
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 // export const createOrder: RequestHandler = async (req, res, next) => {
 //   const order = await Order.create(req.body);
 //   res.send(order);

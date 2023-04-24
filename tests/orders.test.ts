@@ -7,7 +7,7 @@ describe("items", () => {
   it("test", async () => {
     // console.log(await Order.count());
     // console.log(await Order.count());
-    console.log(await Order.find().sort({ id: -1 }).limit(1));
+    console.log(await Order.find({ id: 1 }));
   });
   it("print db", async () => {
     const orders = await Order.find({});
@@ -18,9 +18,6 @@ describe("items", () => {
     );
   }, 500000);
   it("drop db", async () => {
-    await Order.deleteMany();
-  }, 500000);
-  it("drop db", async () => {
-    await Order.deleteMany();
+    // await Order.deleteMany();
   }, 500000);
 });

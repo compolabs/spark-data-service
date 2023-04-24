@@ -26,7 +26,8 @@ export const getLatestTradesForPair: RequestHandler<null> = async (req, res, nex
       },
     ],
   })
-    .limit(40)
+    .sort({ _id: -1 })
+    .limit(500)
     .exec();
   res.send(trades);
 };

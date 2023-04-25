@@ -24,18 +24,23 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
     TOKENS_BY_SYMBOL[symbol1] != null && (filter["asset1"] = TOKENS_BY_SYMBOL[symbol1].assetId);
   }
   let maxPrice =
-    typeof req.query.maxPrice === "string" && req.query.priceDecimal === "string"
+    typeof req.query.maxPrice === "string" && typeof req.query.priceDecimal === "string"
       ? BN.formatUnits(req.query.maxPrice, +req.query.priceDecimal)
+      : null;
+  let minPrice =
+    typeof req.query.minPrice === "string" && typeof req.query.priceDecimal === "string"
+      ? BN.formatUnits(req.query.minPrice, +req.query.priceDecimal)
       : null;
   const orders = await Order.find(filter).exec();
   res.send(
-    maxPrice != null
-      ? orders.filter((order) => {
-          const amount0 = BN.formatUnits(order.amount0, TOKENS_BY_ASSET_ID[order.asset0].decimals);
-          const amount1 = BN.formatUnits(order.amount1, TOKENS_BY_ASSET_ID[order.asset1].decimals);
-          return amount0.div(amount1).lte(maxPrice!);
-        })
-      : orders
+    orders.filter((order) => {
+      const amount0 = BN.formatUnits(order.amount0, TOKENS_BY_ASSET_ID[order.asset0].decimals);
+      const amount1 = BN.formatUnits(order.amount1, TOKENS_BY_ASSET_ID[order.asset1].decimals);
+      return (
+        (maxPrice != null ? amount1.div(amount0).lte(maxPrice) : true) &&
+        (minPrice != null ? amount1.div(amount0).gte(minPrice) : true)
+      );
+    })
   );
 };
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

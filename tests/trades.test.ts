@@ -22,9 +22,26 @@ describe("items", () => {
     }
   }, 500000);
   it("clean db", async () => {
-    await Trade.deleteMany();
+    // await Trade.deleteMany();
   }, 500000);
-  it("print db", async () => {
-    console.log(await Trade.find({}));
+  it("Normalize chart BTC/USDC", async () => {
+    const trades = await Trade.find({});
+    let res = trades
+      .filter(
+        ({ asset0, asset1 }) =>
+          [asset0, asset1].includes(TOKENS_BY_SYMBOL.BTC.assetId) &&
+          [asset0, asset1].includes(TOKENS_BY_SYMBOL.USDC.assetId)
+      )
+      .map((trade) => ({
+        id: trade.id,
+        price:
+          trade.asset0 === TOKENS_BY_SYMBOL.BTC.assetId &&
+          trade.asset1 === TOKENS_BY_SYMBOL.USDC.assetId
+            ? BN.formatUnits(trade.amount1, 6).div(BN.formatUnits(trade.amount0)).toNumber()
+            : BN.formatUnits(trade.amount0, 6).div(BN.formatUnits(trade.amount1)).toNumber(),
+      }))
+      .filter((trade) => trade.price > 30000 || trade.price < 25000);
+    console.log(res);
+    await Trade.deleteMany({ _id: { $in: res.map(({ id }) => id) } });
   }, 500000);
 });

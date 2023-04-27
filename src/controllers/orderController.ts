@@ -31,7 +31,9 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
     typeof req.query.minPrice === "string" && typeof req.query.priceDecimal === "string"
       ? BN.formatUnits(req.query.minPrice, +req.query.priceDecimal)
       : null;
-  const orders = await Order.find(filter).exec();
+  const orders = await Order.find(filter)
+    .limit(!Number.isNaN(+(req.query.limit ?? 1000)) ? +req.query.limit! : 1000)
+    .exec();
   res.send(
     orders.filter((order) => {
       const amount0 = BN.formatUnits(order.amount0, TOKENS_BY_ASSET_ID[order.asset0].decimals);

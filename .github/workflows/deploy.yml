@@ -32,8 +32,7 @@ jobs:
       - name: Stage to PROD
         if: endsWith(github.ref, '/master')
         run: |
-          echo "HEROKU_APP_NAME=spark-data-service" >> $GITHUB_ENV
-          echo "TOKEN=${{secrets.TOKEN}}" >> $GITHUB_ENV
+          echo "HEROKU_APP_NAME=allspark-backend" >> $GITHUB_ENV
           echo "MONGO_URL=${{secrets.MONGO_URL}}" >> $GITHUB_ENV
       - name: Set env
         run: echo ${{env.MONGO_URL }}

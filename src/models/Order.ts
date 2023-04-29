@@ -1,5 +1,4 @@
 import mongoose, { Document } from "mongoose";
-import { OrderOutput } from "../constants/limitOrdersConstants/LimitOrdersAbi";
 
 export interface IOrder {
   id: number;
@@ -14,25 +13,10 @@ export interface IOrder {
   timestamp: number;
   matcher_fee: string;
   matcher_fee_used: string;
+  type: "SELL" | "BUY";
+  price: number;
+  market: string;
 }
-
-const convertTime = (tai64: string): number =>
-  +(BigInt(tai64) - BigInt(Math.pow(2, 62)) - BigInt(10)).toString();
-
-export const orderOutputToIOrder = (order: OrderOutput): IOrder => ({
-  id: order.id.toNumber(),
-  owner: order.owner.value,
-  asset0: order.asset0.value,
-  amount0: order.amount0.toString(),
-  asset1: order.asset1.value,
-  amount1: order.amount1.toString(),
-  status: Object.keys(order.status)[0],
-  fulfilled0: order.fulfilled0.toString(),
-  fulfilled1: order.fulfilled1.toString(),
-  timestamp: convertTime(order.timestamp.toString()),
-  matcher_fee: order.matcher_fee.toString(),
-  matcher_fee_used: order.matcher_fee_used.toString(),
-});
 
 export type OrderDocument = Document & IOrder;
 
@@ -49,6 +33,9 @@ const OrderSchema = new mongoose.Schema({
   timestamp: { type: Number, required: true },
   matcher_fee: { type: String, required: true },
   matcher_fee_used: { type: String, required: true },
+  market: { type: String, required: true },
+  price: { type: Number, required: true },
+  type: { type: String, enum: ["SELL", "BUY"], required: true },
 });
 
 export const Order = mongoose.model<OrderDocument>("Order", OrderSchema);

@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { app } from "./app";
 import { mongoUrl, port } from "./config";
-import { initOrderFetcherCrone } from "./crones/orderFetcherCrone";
 
 // Connect to MongoDB
 // mongoose.Promise = bluebird;
@@ -20,8 +19,6 @@ mongoose
     // process.exit();
   });
 
-initOrderFetcherCrone().then(() => {
-  app.listen(port ?? 5000, () => {
-    console.log("🚀 Server ready at: http://localhost:" + port);
-  });
+app.listen(port ?? 5000, () => {
+  console.log("🚀 Server ready at: http://localhost:" + port);
 });

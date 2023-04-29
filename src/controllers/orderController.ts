@@ -2,10 +2,6 @@ import { RequestHandler } from "express";
 import { Order } from "../models/Order";
 import BN from "../utils/BN";
 import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
-// status: Active | Canceled | Completed
-// symbol: string, example: BTC/USDC
-// maxPrice: number
-// priceDecimal: number
 
 export const getOrders: RequestHandler<null> = async (req, res, next) => {
   const filter: Record<string, string | string[]> = {};
@@ -46,10 +42,18 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
   );
 };
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-// export const createOrder: RequestHandler = async (req, res, next) => {
-//   const order = await Order.create(req.body);
-//   res.send(order);
-// };
+export const getOrderbook: RequestHandler = async (req, res, next) => {
+  const owner = typeof req.query.address === "string" ? req.query.address : "";
+  const market = typeof req.query.symbol === "string" ? req.query.symbol : "";
+  const status = "Active";
+  const [buy, sell, myOrders] = await Promise.all([
+    Order.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
+    Order.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
+    Order.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
+  ]);
+
+  res.send({ myOrders, orderbook: { buy, sell } });
+};
 // export const getOrderById: RequestHandler = async (req, res, next) => {
 //   const order = await Order.findById(req.params.id);
 //   res.send(order);

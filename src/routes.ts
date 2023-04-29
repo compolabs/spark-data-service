@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as orderController from "./controllers/orderController";
 import * as tradeController from "./controllers/tradeController";
-import * as twController from "./controllers/twController";
+import { getLatestTrade } from "./controllers/tradeController";
 
 const router = Router();
 
@@ -9,20 +9,13 @@ router.get("/", (req, res) => res.send("Server is alive 👌"));
 
 // Order routes
 router.get("/orders", orderController.getOrders);
+router.get("/orderbook", orderController.getOrderbook);
 // router.post("/order", orderController.createOrder);
 // router.get("/order/:id", orderController.getOrderById);
 // router.put("/order/:id", orderController.updateOrder);
 // router.delete("/order/:id", orderController.deleteOrder);
 
-router.get("/trades", tradeController.getAllTrades);
-router.get("/trades/pair/:symbol0/:symbol1", tradeController.getLatestTradesForPair);
-router.post("/trade", tradeController.createTrade);
+router.get("/trades", tradeController.getLatestTrade);
 // router.post("/trades", tradeController.createTrades);
-
-router.get("/config", twController.getConfig);
-router.get("/time", twController.getTime);
-router.get("/allSymbols", twController.getAllSymbols);
-router.get("/symbols", twController.getSymbols);
-router.get("/history", twController.getHistory);
 
 export { router };

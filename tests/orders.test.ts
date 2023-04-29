@@ -7,7 +7,20 @@ describe("items", () => {
   it("test", async () => {
     // console.log(await Order.count());
     // console.log(await Order.count());
-    console.log(await Order.find({ id: 1 }));
+    const sell = await Order.find({ status: "Active", type: "SELL" }).sort({ price: 1 }); //.limit(20);
+    let prices = sell.map((o) => o.price);
+    console.log("SELL", {
+      length: prices.length,
+      min: Math.min(...prices),
+      max: Math.max(...prices),
+    });
+    const buy = await Order.find({ status: "Active", type: "BUY" }).sort({ price: -1 }); //.limit(20);
+    prices = buy.map((o) => o.price);
+    console.log("BUY", {
+      length: prices.length,
+      min: Math.min(...prices),
+      max: Math.max(...prices),
+    });
   });
   it("print db", async () => {
     const orders = await Order.find({});

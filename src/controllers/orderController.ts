@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { Order } from "../models/Order";
 import BN from "../utils/BN";
 import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
+import { PredicateOrder } from "../models/PredicateOrder";
 
 export const getOrders: RequestHandler<null> = async (req, res, next) => {
   const filter: Record<string, string | string[]> = {};
@@ -47,9 +48,9 @@ export const getOrderbook: RequestHandler = async (req, res, next) => {
   const market = typeof req.query.symbol === "string" ? req.query.symbol : "";
   const status = "Active";
   const [buy, sell, myOrders] = await Promise.all([
-    Order.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
-    Order.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
-    Order.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
+    PredicateOrder.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
+    PredicateOrder.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
+    PredicateOrder.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
   ]);
 
   res.send({ myOrders, orderbook: { buy, sell } });

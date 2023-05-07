@@ -56,10 +56,6 @@ export const getPredicateOrderbook: RequestHandler = async (req, res, next) => {
 };
 
 export const createPredicateOrder: RequestHandler = async (req, res, next) => {
-  const order = await PredicateOrder.create({
-    ...req.body,
-    status: "ACTIVE",
-    timestamp: "",
-  });
+  await PredicateOrder.create({ ...req.body, status: "Active" });
   res.send({});
 };

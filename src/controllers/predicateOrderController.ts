@@ -46,13 +46,13 @@ export const getPredicateOrderbook: RequestHandler = async (req, res, next) => {
   const owner = typeof req.query.address === "string" ? req.query.address : "";
   const market = typeof req.query.symbol === "string" ? req.query.symbol : "";
   const status = "Active";
-  const [buy, sell, myPredicateOrders] = await Promise.all([
+  const [buy, sell, myOrders] = await Promise.all([
     PredicateOrder.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
     PredicateOrder.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
     PredicateOrder.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
   ]);
 
-  res.send({ myPredicateOrders, orderbook: { buy, sell } });
+  res.send({ myOrders, orderbook: { buy, sell } });
 };
 
 export const createPredicateOrder: RequestHandler = async (req, res, next) => {

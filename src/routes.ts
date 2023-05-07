@@ -1,19 +1,14 @@
 import { Router } from "express";
-import * as orderController from "./controllers/orderController";
 import * as tradeController from "./controllers/tradeController";
-import { getLatestTrade } from "./controllers/tradeController";
+import * as predicateOrderController from "./controllers/predicateOrderController";
 
 const router = Router();
 
 router.get("/", (req, res) => res.send("Server is alive 👌"));
 
-// Order routes
-router.get("/orders", orderController.getOrders);
-router.get("/orderbook", orderController.getOrderbook);
-// router.post("/order", orderController.createOrder);
-// router.get("/order/:id", orderController.getOrderById);
-// router.put("/order/:id", orderController.updateOrder);
-// router.delete("/order/:id", orderController.deleteOrder);
+router.get("/orders", predicateOrderController.getPredicateOrders);
+router.get("/orderbook", predicateOrderController.getPredicateOrderbook);
+router.post("/order", predicateOrderController.createPredicateOrder);
 
 router.get("/trades", tradeController.getLatestTrade);
 // router.post("/trades", tradeController.createTrades);

@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
-import { Order } from "../models/Order";
+import { PredicateOrder } from "../models/PredicateOrder";
 import BN from "../utils/BN";
 import { TOKENS_BY_ASSET_ID, TOKENS_BY_SYMBOL } from "../constants";
 
-export const getOrders: RequestHandler<null> = async (req, res, next) => {
+export const getPredicateOrders: RequestHandler<null> = async (req, res, next) => {
   const filter: Record<string, string | string[]> = {};
 
   if (typeof req.query.id === "string") filter["id"] = req.query.id;
@@ -27,7 +27,7 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
     typeof req.query.minPrice === "string" && typeof req.query.priceDecimal === "string"
       ? BN.formatUnits(req.query.minPrice, +req.query.priceDecimal)
       : null;
-  const orders = await Order.find(filter)
+  const orders = await PredicateOrder.find(filter)
     .limit(!Number.isNaN(+(req.query.limit ?? 1000)) ? +req.query.limit! : 1000)
     .exec();
   res.send(
@@ -42,28 +42,24 @@ export const getOrders: RequestHandler<null> = async (req, res, next) => {
   );
 };
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-export const getOrderbook: RequestHandler = async (req, res, next) => {
+export const getPredicateOrderbook: RequestHandler = async (req, res, next) => {
   const owner = typeof req.query.address === "string" ? req.query.address : "";
   const market = typeof req.query.symbol === "string" ? req.query.symbol : "";
   const status = "Active";
-  const [buy, sell, myOrders] = await Promise.all([
-    Order.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
-    Order.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
-    Order.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
+  const [buy, sell, myPredicateOrders] = await Promise.all([
+    PredicateOrder.find({ market, status, type: "BUY" }).sort({ price: -1 }).limit(40), //дороже
+    PredicateOrder.find({ market, status, type: "SELL" }).sort({ price: 1 }).limit(40), //дешевле
+    PredicateOrder.find({ owner, market, status }).sort({ timestamp: -1 }).limit(50),
   ]);
 
-  res.send({ myOrders, orderbook: { buy, sell } });
+  res.send({ myPredicateOrders, orderbook: { buy, sell } });
 };
-// export const getOrderById: RequestHandler = async (req, res, next) => {
-//   const order = await Order.findById(req.params.id);
-//   res.send(order);
-// };
-//
-// export const updateOrder: RequestHandler = async (req, res, next) => {
-//   const order = await Order.findByIdAndUpdate(req.params.id, req.body);
-//   res.send(order);
-// };
-// export const deleteOrder: RequestHandler = async (req, res, next) => {
-//   await Order.findByIdAndDelete(req.params.id);
-//   res.send("OK");
-// };
+
+export const createPredicateOrder: RequestHandler = async (req, res, next) => {
+  const order = await PredicateOrder.create({
+    ...req.body,
+    status: "ACTIVE",
+    timestamp: "",
+  });
+  res.send({});
+};
